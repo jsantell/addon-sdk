@@ -390,4 +390,57 @@ exports['test `all` with multiple rejected'] = function (assert, done) {
   });
 };
 
+exports['test `done` returns `undefined`'] = function (assert, done) {
+  assert.equal(resolve(10).done(), undefined, 'done returns undefined');
+  done();
+};
+
+exports['test `done` throws error with no arguments'] = function (assert, done) {
+  assert.throws(function () {
+    resolve(1).then(resolve).then(function () {
+      throw Error('boom');
+    }).done();
+  }, /boom/, 'throws error');
+  done();
+};
+
+exports['test `done` handles success, error callbacks as `then`'] = function (assert, done) {
+
+  resolve(111).then(resolve).then(resolve).done(function (x) {
+    assert.equal(x, 111, 'handles fulfilled callback');
+    next();
+  }, function () {
+    assert.fail('should not call reject callback');
+  });
+
+  function next () {
+    resolve(111).then(resolve).then(function () {
+      throw new Error('boom');
+    }).done(function () {
+      assert.fail('should not call fulfilled callback');
+    }, function (e) {
+      assert.equal(e.message, 'boom', 'should handle error like `then`');
+      done();
+    });
+  }
+};
+
+exports['test `done` handles error callbacks, and throws when returned'] = function (assert, done) {
+  assert.throws(run, /boom/, 'Should handle and throw error');
+  done();
+  function run () {
+    resolve(111).then(resolve).then(function () {
+      throw new Error('boom');
+    }).done(function () {
+      assert.fail('should not call fulfilled callback');
+    }, function (e) {
+      assert.equal(e.message, 'boom', 'should handle error like `then`');
+      return reject(e);
+    });
+  }
+};
+
+// TODO
+// return a rejected promise should throw an error, in fuilflled CB
+
 require("test").run(exports)
