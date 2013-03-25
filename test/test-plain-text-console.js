@@ -36,23 +36,23 @@ exports.testPlainTextConsole = function(test) {
   test.pass("PlainTextConsole instantiates");
 
   con.log('testing', 1, [2, 3, 4]);
-  test.assertEqual(lastPrint(), "info: " + name + ": testing 1 2,3,4\n",
+  test.assertEqual(lastPrint(), "info: " + name + ": testing 1 [2,3,4]\n",
                    "PlainTextConsole.log() must work.");
 
   con.info('testing', 1, [2, 3, 4]);
-  test.assertEqual(lastPrint(), "info: " + name + ": testing 1 2,3,4\n",
+  test.assertEqual(lastPrint(), "info: " + name + ": testing 1 [2,3,4]\n",
                    "PlainTextConsole.info() must work.");
 
   con.warn('testing', 1, [2, 3, 4]);
-  test.assertEqual(lastPrint(), "warn: " + name + ": testing 1 2,3,4\n",
+  test.assertEqual(lastPrint(), "warn: " + name + ": testing 1 [2,3,4]\n",
                    "PlainTextConsole.warn() must work.");
 
   con.error('testing', 1, [2, 3, 4]);
-  test.assertEqual(lastPrint(), "error: " + name + ": testing 1 2,3,4\n",
+  test.assertEqual(lastPrint(), "error: " + name + ": testing 1 [2,3,4]\n",
                    "PlainTextConsole.error() must work.");
 
   con.debug('testing', 1, [2, 3, 4]);
-  test.assertEqual(lastPrint(), "debug: " + name + ": testing 1 2,3,4\n",
+  test.assertEqual(lastPrint(), "debug: " + name + ": testing 1 [2,3,4]\n",
                    "PlainTextConsole.debug() must work.");
 
   con.log('testing', undefined);
