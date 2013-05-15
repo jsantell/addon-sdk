@@ -1,4 +1,5 @@
 before_script:
+  - echo uname -a
   - cd ..
 #  - url="http://ftp.mozilla.org/pub/mozilla.org/firefox/releases/latest/linux-x86_64/en-US/"
   - url="http://ftp.mozilla.org/pub/mozilla.org/firefox/releases/latest/linux-i686/en-US/"
