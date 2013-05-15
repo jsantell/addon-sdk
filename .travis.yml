@@ -1,8 +1,8 @@
 before_script:
   - uname -a
   - cd ..
-#  - url="http://ftp.mozilla.org/pub/mozilla.org/firefox/releases/latest/linux-x86_64/en-US/"
-  - url="http://ftp.mozilla.org/pub/mozilla.org/firefox/releases/latest/linux-i686/en-US/"
+  - url="http://ftp.mozilla.org/pub/mozilla.org/firefox/releases/latest/linux-x86_64/en-US/"
+#  - url="http://ftp.mozilla.org/pub/mozilla.org/firefox/releases/latest/linux-i686/en-US/"
   - index=`wget -q -O - $url`
   - file=`echo $index | tr '\n' ' ' | sed 's/.*\(firefox-[0-9]*[\.0-9]*.tar.bz2\).*/\1/'`
   - wget -O firefox.tar.bz2 "$url""$file"
