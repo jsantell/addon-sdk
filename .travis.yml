@@ -1,5 +1,5 @@
 before_script:
-  - echo uname -a
+  - uname -a
   - cd ..
 #  - url="http://ftp.mozilla.org/pub/mozilla.org/firefox/releases/latest/linux-x86_64/en-US/"
   - url="http://ftp.mozilla.org/pub/mozilla.org/firefox/releases/latest/linux-i686/en-US/"
@@ -10,6 +10,4 @@ before_script:
   - Xvfb :1 -screen 0 1280x960x24 &
 
 script:
-  - cd addon-sdk
-  - . bin/activate
-  - DISPLAY=:1 cfx testall -b ../firefox/firefox
+  - cd addon-sdk && . bin/activate && DISPLAY=:1 cfx testall -b ../firefox/firefox -v
