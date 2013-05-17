@@ -1101,14 +1101,11 @@ function openBrowserWindow(callback, url) {
       if (event.target && event.target.defaultView == window) {
         window.removeEventListener("load", onLoad, true);
         let browsers = window.document.getElementsByTagName("tabbrowser");
-        try {
-          timer.setTimeout(function () {
-            callback(window, browsers[0]);
-          }, 10);
-        }
-        catch (e) {
-          console.exception(e);
-        }
+        let gBrowser = browsers[0];
+        gBrowser.addEventListener("load", function onBrowserLoad(event) {
+          gBrowser.removeEventListener("load", onBrowserLoad, true);
+          callback(window, gBrowser);
+        }, true);
       }
     }, true);
   }
