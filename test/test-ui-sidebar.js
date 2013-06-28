@@ -803,7 +803,7 @@ exports.testShowingInOneWindowDoesNotAffectOtherWindows = function(assert, done)
   }, assert.fail);
 }
 
-exports.testHidingAHiddenSidebarRejects = function(assert) {
+exports.testHidingAHiddenSidebarRejects = function(assert, done) {
   const { Sidebar } = require('sdk/ui/sidebar');
   let testName = 'testHidingAHiddenSidebarRejects';
   let url = 'data:text/html;charset=utf-8,'+testName;
@@ -1341,7 +1341,7 @@ exports.testEventListeners = function(assert, done) {
     onHide.resolve();
   });
 
-  all(constructorOnShow.promise,
+  all([constructorOnShow.promise,
       constructorOnAttach.promise,
       constructorOnHide.promise,
       onceShow.promise,
@@ -1349,7 +1349,7 @@ exports.testEventListeners = function(assert, done) {
       onceHide.promise,
       onShow.promise,
       onAttach.promise,
-      onHide.promise).then(function() {
+      onHide.promise]).then(function() {
         assert.equal(eventListenerOrder.join(), [
             'onAttach',
             'once attach',
