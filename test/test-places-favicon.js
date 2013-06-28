@@ -147,11 +147,11 @@ exports.testTabsGetFaviconPromiseFailure = function (assert, done) {
 exports.testRejects = function (assert, done) {
   getFavicon({})
     .then(invalidResolve(assert), validReject(assert, 'Object'))
-  .then(getFavicon(null))
+  .then(() => getFavicon(null))
     .then(invalidResolve(assert), validReject(assert, 'null'))
-  .then(getFavicon(undefined))
+  .then(() => getFavicon(undefined))
     .then(invalidResolve(assert), validReject(assert, 'undefined'))
-  .then(getFavicon([]))
+  .then(() => getFavicon([]))
     .then(invalidResolve(assert), validReject(assert, 'Array'))
     .then(done);
 };

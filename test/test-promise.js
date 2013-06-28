@@ -4,326 +4,298 @@
 
 'use strict';
 
-var core = require('sdk/core/promise'),
-    defer = core.defer, resolve = core.resolve, reject = core.reject, all = core.all,
-    promised = core.promised;
-
-var { setTimeout } = require('sdk/timers');
+const { Cc, Cu, Ci } = require('chrome');
+const { defer, resolve, reject, all, promised } = require('sdk/core/promise');
+const { setTimeout } = require('sdk/timers');
+const { prefixURI, name } = require('@loader/options');
+const promiseURI = prefixURI + name + '/lib/sdk/core/promise.js';
 
 exports['test all observers are notified'] = function(assert, done) {
-  var expected = 'Taram pam param!'
-  var deferred = defer()
-  var pending = 10, i = 0
+  let expected = 'Taram pam param!';
+  let deferred = defer();
+  let pending = 10, i = 0;
 
   function resolved(value) {
-    assert.equal(value, expected, 'value resolved as expected: #' + pending)
-    if (!--pending) done()
+    assert.equal(value, expected, 'value resolved as expected: #' + pending);
+    if (!--pending) done();
   }
 
-  while (i++ < pending) deferred.promise.then(resolved)
+  while (i++ < pending) deferred.promise.then(resolved);
 
-  deferred.resolve(expected)
-}
+  deferred.resolve(expected);
+};
 
 exports['test exceptions dont stop notifications'] = function(assert, done) {
-  var threw = false, boom = Error('Boom!')
-  var deferred = defer()
+  let threw = false, boom = Error('Boom!');
+  let deferred = defer();
 
-  var promise2 = deferred.promise.then(function() {
-    threw = true
-    throw boom
-  })
+  let promise2 = deferred.promise.then(function() {
+    threw = true;
+    throw boom;
+  });
 
   deferred.promise.then(function() {
-    assert.ok(threw, 'observer is called even though previos one threw')
+    assert.ok(threw, 'observer is called even though previos one threw');
     promise2.then(function() {
-      assert.fail('should not resolve')
+      assert.fail('should not resolve');
     }, function(reason) {
-      assert.equal(reason, boom, 'rejects to thrown error')
-      done()
-    })
-  })
+      assert.equal(reason, boom, 'rejects to thrown error');
+      done();
+    });
+  });
 
-  deferred.resolve('go!')
-}
+  deferred.resolve('go!');
+};
 
 exports['test subsequent resolves are ignored'] = function(assert, done) {
-  var deferred = defer()
-  deferred.resolve(1)
-  deferred.resolve(2)
-  deferred.reject(3)
+  let deferred = defer();
+  deferred.resolve(1);
+  deferred.resolve(2);
+  deferred.reject(3);
 
   deferred.promise.then(function(actual) {
-    assert.equal(actual, 1, 'resolves to first value')
+    assert.equal(actual, 1, 'resolves to first value');
   }, function() {
-    assert.fail('must not reject')
-  })
+    assert.fail('must not reject');
+  });
   deferred.promise.then(function(actual) {
-    assert.equal(actual, 1, 'subsequent resolutions are ignored')
-    done()
+    assert.equal(actual, 1, 'subsequent resolutions are ignored');
+    done();
   }, function() {
-    assert.fail('must not reject')
-  })
-}
+    assert.fail('must not reject');
+  });
+};
 
 exports['test subsequent rejections are ignored'] = function(assert, done) {
-  var deferred = defer()
-  deferred.reject(1)
-  deferred.resolve(2)
-  deferred.reject(3)
+  let deferred = defer();
+  deferred.reject(1);
+  deferred.resolve(2);
+  deferred.reject(3);
 
   deferred.promise.then(function(actual) {
-    assert.fail('must not resolve')
+    assert.fail('must not resolve');
   }, function(actual) {
-    assert.equal(actual, 1, 'must reject to first')
-  })
+    assert.equal(actual, 1, 'must reject to first');
+  });
   deferred.promise.then(function(actual) {
-    assert.fail('must not resolve')
+    assert.fail('must not resolve');
   }, function(actual) {
-    assert.equal(actual, 1, 'must reject to first')
-    done()
-  })
-}
+    assert.equal(actual, 1, 'must reject to first');
+    done();
+  });
+};
 
 exports['test error recovery'] = function(assert, done) {
-  var boom = Error('Boom!')
-  var deferred = defer()
+  let boom = Error('Boom!');
+  let deferred = defer();
 
   deferred.promise.then(function() {
-    assert.fail('rejected promise should not resolve')
+    assert.fail('rejected promise should not resolve');
   }, function(reason) {
-    assert.equal(reason, boom, 'rejection reason delivered')
-    return 'recovery'
+    assert.equal(reason, boom, 'rejection reason delivered');
+    return 'recovery';
   }).then(function(value) {
-    assert.equal(value, 'recovery', 'error handled by a handler')
-    done()
-  })
+    assert.equal(value, 'recovery', 'error handled by a handler');
+    done();
+  });
 
-  deferred.reject(boom)
-}
-
+  deferred.reject(boom);
+};
 
 exports['test error recovery with promise'] = function(assert, done) {
-  var deferred = defer()
+  let deferred = defer();
 
   deferred.promise.then(function() {
-    assert.fail('must reject')
+    assert.fail('must reject');
   }, function(actual) {
-    assert.equal(actual, 'reason', 'rejected')
-    var deferred = defer()
-    deferred.resolve('recovery')
-    return deferred.promise
+    assert.equal(actual, 'reason', 'rejected');
+    let deferred = defer();
+    deferred.resolve('recovery');
+    return deferred.promise;
   }).then(function(actual) {
-    assert.equal(actual, 'recovery', 'recorvered via promise')
-    var deferred = defer()
-    deferred.reject('error')
-    return deferred.promise
+    assert.equal(actual, 'recovery', 'recorvered via promise');
+    let deferred = defer();
+    deferred.reject('error');
+    return deferred.promise;
   }).then(null, function(actual) {
-    assert.equal(actual, 'error', 'rejected via promise')
-    var deferred = defer()
-    deferred.reject('end')
-    return deferred.promise
+    assert.equal(actual, 'error', 'rejected via promise');
+    let deferred = defer();
+    deferred.reject('end');
+    return deferred.promise;
   }).then(null, function(actual) {
-    assert.equal(actual, 'end', 'rejeced via promise')
-    done()
-  })
+    assert.equal(actual, 'end', 'rejeced via promise');
+    done();
+  });
 
-  deferred.reject('reason')
-}
+  deferred.reject('reason');
+};
 
 exports['test propagation'] = function(assert, done) {
-  var d1 = defer(), d2 = defer(), d3 = defer()
+  let d1 = defer(), d2 = defer(), d3 = defer();
 
   d1.promise.then(function(actual) {
-    assert.equal(actual, 'expected', 'resolves to expected value')
-    done()
-  })
+    assert.equal(actual, 'expected', 'resolves to expected value');
+    done();
+  });
 
-  d1.resolve(d2.promise)
-  d2.resolve(d3.promise)
-  d3.resolve('expected')
-}
+  d1.resolve(d2.promise);
+  d2.resolve(d3.promise);
+  d3.resolve('expected');
+};
 
 exports['test chaining'] = function(assert, done) {
-  var boom = Error('boom'), brax = Error('braxXXx')
-  var deferred = defer()
+  let boom = Error('boom'), brax = Error('braxXXx');
+  let deferred = defer();
 
   deferred.promise.then().then().then(function(actual) {
-    assert.equal(actual, 2, 'value propagates unchanged')
-    return actual + 2
+    assert.equal(actual, 2, 'value propagates unchanged');
+    return actual + 2;
   }).then(null, function(reason) {
-    assert.fail('should not reject')
+    assert.fail('should not reject');
   }).then(function(actual) {
-    assert.equal(actual, 4, 'value propagates through if not handled')
-    throw boom
+    assert.equal(actual, 4, 'value propagates through if not handled');
+    throw boom;
   }).then(function(actual) {
-    assert.fail('exception must reject promise')
+    assert.fail('exception must reject promise');
   }).then().then(null, function(actual) {
-    assert.equal(actual, boom, 'reason propagates unchanged')
-    throw brax
+    assert.equal(actual, boom, 'reason propagates unchanged');
+    throw brax;
   }).then().then(null, function(actual) {
-    assert.equal(actual, brax, 'reason changed becase of exception')
-    return 'recovery'
+    assert.equal(actual, brax, 'reason changed becase of exception');
+    return 'recovery';
   }).then(function(actual) {
-    assert.equal(actual, 'recovery', 'recovered from error')
-    done()
-  })
+    assert.equal(actual, 'recovery', 'recovered from error');
+    done();
+  });
 
-  deferred.resolve(2)
-}
-
+  deferred.resolve(2);
+};
 
 exports['test reject'] = function(assert, done) {
-  var expected = Error('boom')
+  let expected = Error('boom');
 
   reject(expected).then(function() {
-    assert.fail('should reject')
+    assert.fail('should reject');
   }, function(actual) {
-    assert.equal(actual, expected, 'rejected with expected reason')
-  }).then(function() {
-    done()
-  })
-}
+    assert.equal(actual, expected, 'rejected with expected reason');
+  }).then(done);
+};
 
 exports['test resolve to rejected'] = function(assert, done) {
-  var expected = Error('boom')
-  var deferred = defer()
+  let expected = Error('boom');
+  let deferred = defer();
 
   deferred.promise.then(function() {
-    assert.fail('should reject')
+    assert.fail('should reject');
   }, function(actual) {
-    assert.equal(actual, expected, 'rejected with expected failure')
-  }).then(function() {
-    done()
-  })
+    assert.equal(actual, expected, 'rejected with expected failure');
+  }).then(done);
 
-  deferred.resolve(reject(expected))
-}
+  deferred.resolve(reject(expected));
+};
 
 exports['test resolve'] = function(assert, done) {
-  var expected = 'value'
+  let expected = 'value';
   resolve(expected).then(function(actual) {
-    assert.equal(actual, expected, 'resolved as expected')
-  }).then(function() {
-    done()
-  })
-}
-
-exports['test resolve with prototype'] = function(assert, done) {
-  var seventy = resolve(70, {
-    subtract: function subtract(y) {
-      return this.then(function(x) { return x - y })
-    }
-  })
-
-  seventy.subtract(17).then(function(actual) {
-    assert.equal(actual, 70 - 17, 'resolves to expected')
-    done()
-  })
-}
+    assert.equal(actual, expected, 'resolved as expected');
+  }).then(done);
+};
 
 exports['test promised with normal args'] = function(assert, done) {
-  var sum = promised(function(x, y) { return x + y })
+  let sum = promised((x, y) => x + y );
 
   sum(7, 8).then(function(actual) {
-    assert.equal(actual, 7 + 8, 'resolves as expected')
-    done()
-  })
-}
+    assert.equal(actual, 7 + 8, 'resolves as expected');
+    done();
+  });
+};
 
 exports['test promised with promise args'] = function(assert, done) {
-  var sum = promised(function(x, y) { return x + y })
-  var deferred = defer()
+  let sum = promised((x, y) => x + y );
+  let deferred = defer();
 
   sum(11, deferred.promise).then(function(actual) {
-    assert.equal(actual, 11 + 24, 'resolved as expected')
-    done()
-  })
+    assert.equal(actual, 11 + 24, 'resolved as expected');
+    done();
+  });
 
-  deferred.resolve(24)
-}
-
-exports['test promised with prototype'] = function(assert, done) {
-  var deferred = defer()
-  var numeric = {}
-  numeric.subtract = promised(function(y) { return this - y }, numeric)
-
-  var sum = promised(function(x, y) { return x + y }, numeric)
-
-  sum(7, 70).
-    subtract(14).
-    subtract(deferred.promise).
-    subtract(5).
-    then(function(actual) {
-      assert.equal(actual, 7 + 70 - 14 - 23 - 5, 'resolved as expected')
-      done()
-    })
-
-  deferred.resolve(23)
-}
+  deferred.resolve(24);
+};
 
 exports['test promised error handleing'] = function(assert, done) {
-  var expected = Error('boom')
-  var f = promised(function() {
-    throw expected
-  })
+  let expected = Error('boom');
+  let f = promised(function() {
+    throw expected;
+  });
 
   f().then(function() {
-    assert.fail('should reject')
+    assert.fail('should reject');
   }, function(actual) {
-    assert.equal(actual, expected, 'rejected as expected')
-    done()
-  })
-}
+    assert.equal(actual, expected, 'rejected as expected');
+    done();
+  });
+};
 
 exports['test return promise form promised'] = function(assert, done) {
-  var f = promised(function() {
-    return resolve(17)
-  })
+  let f = promised(function() {
+    return resolve(17);
+  });
 
   f().then(function(actual) {
-    assert.equal(actual, 17, 'resolves to a promise resolution')
-    done()
-  })
-}
+    assert.equal(actual, 17, 'resolves to a promise resolution');
+    done();
+  });
+};
 
 exports['test promised returning failure'] = function(assert, done) {
-  var expected = Error('boom')
-  var f = promised(function() {
-    return reject(expected)
-  })
+  let expected = Error('boom');
+  let f = promised(function() {
+    return reject(expected);
+  });
 
   f().then(function() {
-    assert.fail('must reject')
+    assert.fail('must reject');
   }, function(actual) {
-    assert.equal(actual, expected, 'rejects with expected reason')
-    done()
-  })
-}
+    assert.equal(actual, expected, 'rejects with expected reason');
+    done();
+  });
+};
 
-exports['test promised are greedy'] = function(assert, done) {
-  var runs = 0
-  var f = promised(function() { ++runs })
-  var promise = f()
-  assert.equal(runs, 1, 'promised runs task right away')
-  done()
-}
+/*
+ * Changed for compliance in Bug 881047, promises are now always async
+ */
+exports['test promises are always async'] = function (assert, done) {
+  let runs = 0;
+  resolve(1).then(val => ++runs);
+  assert.equal(runs, 0, 'resolutions are called in following tick');
+  done();
+};
+
+/*
+ * Changed for compliance in Bug 881047, promised's are now non greedy
+ */
+exports['test promised are not greedy'] = function(assert, done) {
+  let runs = 0;
+  promised(() => ++runs)();
+  assert.equal(runs, 0, 'promised does not run task right away');
+  done();
+};
 
 exports['test arrays should not flatten'] = function(assert, done) {
-  var a = defer()
-  var b = defer()
+  let a = defer();
+  let b = defer();
 
-  var combine = promised(function(str, arr) {
-    assert.equal(str, 'Hello', 'Array was not flattened')
-    assert.deepEqual(arr, [ 'my', 'friend' ])
-  })
+  let combine = promised(function(str, arr) {
+    assert.equal(str, 'Hello', 'Array was not flattened');
+    assert.deepEqual(arr, [ 'my', 'friend' ]);
+  });
 
-  combine(a.promise, b.promise).then(done)
+  combine(a.promise, b.promise).then(done);
 
 
-  a.resolve('Hello')
-  b.resolve([ 'my', 'friend' ])
-}
+  a.resolve('Hello');
+  b.resolve([ 'my', 'friend' ]);
+};
 
 exports['test `all` for all promises'] = function (assert, done) {
   all([
@@ -351,7 +323,7 @@ exports['test `all` aborts upon first reject'] = function (assert, done) {
   });
 
   function delayedResolve () {
-    var deferred = defer();
+    let deferred = defer();
     setTimeout(deferred.resolve, 50);
     return deferred.promise;
   }
@@ -389,4 +361,43 @@ exports['test `all` with multiple rejected'] = function (assert, done) {
   });
 };
 
-require("test").run(exports)
+exports['test JSM Load and API'] = function (assert, done) {
+  let { Promise } = Cu.import(promiseURI, {});
+  testEnvironment(Promise, assert, done);
+};
+
+exports['test mozIJSSubScriptLoader exporting'] = function (assert, done) {
+  let { Services } = Cu.import('resource://gre/modules/Services.jsm', {});
+  let systemPrincipal = Services.scriptSecurityManager.getSystemPrincipal();
+  let Promise = new Cu.Sandbox(systemPrincipal);
+  let loader = Cc['@mozilla.org/moz/jssubscript-loader;1']
+                 .getService(Ci.mozIJSSubScriptLoader);
+  loader.loadSubScript(promiseURI, Promise);
+
+  testEnvironment(Promise, assert, done);
+};
+
+function testEnvironment ({all, resolve, defer, reject, promised}, assert, done) {
+  all([resolve(5), resolve(10), 925]).then(val => {
+    assert.equal(val[0], 5, 'promise#all as SubScript works');
+    assert.equal(val[1], 10, 'promise#all as SubScript works');
+    assert.equal(val[2], 925, 'promise#all as SubScript works');
+    return resolve(1000);
+  }).then(value => {
+    assert.equal(value, 1000, 'promise#resolve as SubScript works');
+    return reject('testing reject');
+  }).then(null, reason => {
+    assert.equal(reason, 'testing reject', 'promise#reject as SubScript works');
+    let deferred = defer();
+    setTimeout(() => deferred.resolve('\\m/'), 10);
+    return deferred.promise;
+  }).then(value => {
+    assert.equal(value, '\\m/', 'promise#defer as SubScript works');
+    return promised(x => x * x)(5);
+  }).then(value => {
+    assert.equal(value, 25, 'promise#promised as SubScript works');
+    done();
+  });
+};
+
+require("test").run(exports);

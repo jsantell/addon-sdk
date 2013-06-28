@@ -258,8 +258,8 @@ that.
 ## defer
 
 Module exports `defer` function, which is where all promises ultimately
-come from. Lets see implementation of `readAsync` that we used in lot's
-of examples above:
+come from. Lets see implementation of `readAsync` that we used in several
+examples above:
 
     const { defer } = require('sdk/core/promise');
     function readAsync(url) {
@@ -340,30 +340,6 @@ In such cases it's useful to put a timer on such tasks:
       alert('Network is being too slow, try again later');
     });
 
-## Alternative promise APIs
-
-There may be a cases where you will want to provide more than just `then`
-method on your promises. In fact some other promise frameworks do that.
-Such use cases are also supported. Earlier described `defer` may be passed
-optional `prototype` argument, in order to make returned promise and all
-the subsequent promises decedents of that `prototype`:
-
-    let { promise, resolve } = defer({
-      get: function get(name) {
-        return this.then(function(value) {
-          return value[name];
-        })
-      }
-    });
-
-    promise.get('foo').get('bar').then(console.log);
-    resolve({ foo: { bar: 'taram !!' } });
-
-    // => 'taram !!'
-
-Also `promised` function maybe passed second optional `prototype` argument to
-achieve same effect.
-
 ## Treat all values as promises
 
 Module provides a simple function for wrapping values into promises:
@@ -399,9 +375,6 @@ type:
 *Note: We could not use `promised` function here, as they reject returned
 promise if any of the given arguments is rejected.*
 
-If you need to customize your promises even further you may pass `resolve` a
-second optional `prototype` argument that will have same effect as with `defer`.
-
 ## Treat errors as promises
 
 Now that we can create all kinds of eventual values, it's useful to have a
@@ -417,5 +390,3 @@ it.
       return Math.random() < 0.5 ? boom : value
     })
 
-As with rest of the APIs error may be given second optional `prototype`
-argument to customize resulting promise to your needs.
