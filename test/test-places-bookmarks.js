@@ -151,7 +151,7 @@ exports.testCreateError = function (assert, done) {
     assert.equal(items[1], bookmarks[1], 'should be original, unsaved object');
 
     search({ query: 'moz' }).on('end', items => {
-      assert.equal(items.length, 2, 'only two items were successfully saved');
+      assert.equal(items.length, 2, 'only two items were successfully saved'+items+items[0]+items[1]);
       bookmarks[1].url = 'http://moz2.com/';
       dataCount = errorCount = 0;
       save(bookmarks).on('data', bookmark => {

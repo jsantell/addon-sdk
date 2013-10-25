@@ -85,14 +85,14 @@ exports.testBookmarkLastUpdated = function (assert, done) {
     return send('sdk-places-bookmarks-last-updated', { id: item.id });
   }).then(function (updated) {
     let { resolve, promise } = defer();
-    assert.equal(timestamp, updated, 'should return last updated time');
+    assert.equal(timestamp, updated, 'should return last updated time' + timestamp +','+updated);
     item.title = 'updated mozilla';
     setTimeout(() => {
       resolve(send('sdk-places-bookmarks-save', item));
     }, 100);
     return promise;
   }).then(function (data) {
-    assert.ok(data.updated > timestamp, 'time has elapsed and updated the updated property');
+    assert.ok(data.updated > timestamp, 'time has elapsed and updated the updated property'+data.updated+','+timestamp);
     done();
   });
 };
@@ -174,7 +174,7 @@ exports.testTagsUntag = function (assert, done) {
     assert.ok(~tags.indexOf('tag3'), 'second tag persisted');
     assert.ok(!~tags.indexOf('firefox'), 'first tag removed');
     assert.ok(!~tags.indexOf('tag2'), 'second tag removed');
-    assert.equal(tags.length, 2, 'no extra tags');
+    assert.equal(tags.length, 2, 'no extra tags'+tags);
     done();
   });
 };
@@ -198,7 +198,7 @@ exports.testTagsGetURLsByTag = function (assert, done) {
 exports.testTagsGetTagsByURL = function (assert, done) {
   let item;
   createBookmark({
-    url: 'http://test-places-host.com/testTagsGetURLsByTag/',
+    url: 'http://test-places-host.com/testTestTagsGetTagsByURL/',
     tags: ['firefox', 'mozilla', 'metal']
   }).then(function (data) {
     item = data;
@@ -231,7 +231,7 @@ exports.testHostQuery = function (assert, done) {
       options: { sortingMode: 6, queryType: 1 } // sort by URI ascending, bookmarks only
     });
   }).then(results => {
-    assert.equal(results.length, 2, 'should only return two');
+    assert.equal(results.length, 2, 'should only return two'+results[0]+results[1]);
     assert.equal(results[0].url,
       'http://mozilla.com/testHostQuery/', 'is sorted by URI asc');
     return send('sdk-places-query', {
@@ -239,9 +239,9 @@ exports.testHostQuery = function (assert, done) {
       options: { sortingMode: 5, queryType: 1 } // sort by URI descending, bookmarks only
     });
   }).then(results => {
-    assert.equal(results.length, 2, 'should only return two');
+    assert.equal(results.length, 2, 'should only return two'+results+results[0]+results[1]);
     assert.equal(results[0].url,
-      'http://firefox.com/testHostQuery/', 'is sorted by URI desc');
+      'http://firefox.com/testHostQuery/', 'is sorted by URI desc' +results[0].url);
     done();
   });
 };

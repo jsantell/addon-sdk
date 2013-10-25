@@ -29,7 +29,7 @@ exports.testEmptyQuery = function (assert, done) {
   addVisits([
     'http://simplequery-1.com', 'http://simplequery-2.com'
   ]).then(searchP).then(results => {
-    assert.equal(results.length, 2, 'Correct number of entries returned');
+    assert.equal(results.length, 2, 'Correct number of entries returned'+results[0].url+results[1].url+results);
     assert.equal(results[0].url, 'http://simplequery-1.com/',
       'matches url');
     assert.equal(results[1].url, 'http://simplequery-2.com/',
@@ -87,9 +87,6 @@ exports.testSearchURL = function (assert, done) {
   });
 };
 
-// Disabling due to intermittent Bug 892619
-// TODO solve this
-/*
 exports.testSearchTimeRange = function (assert, done) {
   let firstTime, secondTime;
   addVisits([
@@ -107,38 +104,38 @@ exports.testSearchTimeRange = function (assert, done) {
     });
     return searchP({ from: firstTime - 1000 });
   }).then(results => {
-    assert.equal(results.length, 4, 'should return all entries');
+    assert.equal(results.length, 4, 'should return all entries'+results+','+(firstTime)+','+secondTime+','+(firstTime-1000));
     return searchP({ to: firstTime + 500 });
   }).then(results => {
-    assert.equal(results.length, 2, 'should return only first entries');
+    assert.equal(results.length, 2, 'should return only first entries'+results+(firstTime+500));
     results.map(item => {
       assert.ok(/earlyvisit/.test(item.url), 'correct entry');
     });
     return searchP({ from: firstTime + 500 });
   }).then(results => {
-    assert.equal(results.length, 2, 'should return only last entries');
+    assert.equal(results.length, 2, 'should return only last entries'+results+(firstTime+500));
     results.map(item => {
       assert.ok(/newvisit/.test(item.url), 'correct entry');
     });
     done();
   });
 };
-*/
+
 exports.testSearchQuery = function (assert, done) {
   addVisits([
     'http://mozilla.com', 'http://webaud.io', 'http://mozilla.com/webfwd'
   ]).then(() => {
     return searchP({ query: 'moz' });
   }).then(results => {
-    assert.equal(results.length, 2, 'should return urls that match substring');
+    assert.equal(results.length, 2, 'should return urls that match substring ' + results[0] + ','+results[1]);
     results.map(({url}) => {
-      assert.ok(/moz/.test(url), 'correct item');
+      assert.ok(/moz/.test(url), 'correct item ' + url);
     });
     return searchP([{ query: 'webfwd' }, { query: 'aud.io' }]);
   }).then(results => {
-    assert.equal(results.length, 2, 'should OR separate queries');
+    assert.equal(results.length, 2, 'should OR separate queries ' + results[0] +','+results[1]);
     results.map(({url}) => {
-      assert.ok(/webfwd|aud\.io/.test(url), 'correct item');
+      assert.ok(/webfwd|aud\.io/.test(url), 'correct item' + url);
     });
     done();
   });
@@ -208,9 +205,9 @@ exports.testSearchSort = function (assert, done) {
   }).then(done);
 
   function checkOrder (results, nums) {
-    assert.equal(results.length, nums.length, 'expected return count');
+    assert.equal(results.length, nums.length, 'expected return count ' + results);
     for (let i = 0; i < nums.length; i++) {
-      assert.equal(results[i].url, places[nums[i]], 'successful order');
+      assert.equal(results[i].url, places[nums[i]], 'successful order ' + results[i].url);
     }
   }
 };
