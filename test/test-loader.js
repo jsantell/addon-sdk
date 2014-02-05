@@ -260,6 +260,20 @@ exports['test require json'] = function (assert) {
   }
 };
 
+exports['test require json with paths'] = function (assert) {
+  let jsonPath = root + '/fixtures/loader/json/';
+  let rootPath = root + '/fixtures/loader/json-paths/';
+  let loader = Loader({ paths: { 'json/': jsonPath, '': rootPath }});
+
+  let data = main(loader, 'main');
+
+  assert.equal(data.name, 'Jetpack Loader Test', 'loads json with strings');
+  assert.equal(data.version, '1.0.1', 'loads json with strings');
+  assert.equal(data.dependencies.async, '*', 'loads json with objects');
+  assert.equal(data.dependencies.underscore, '*', 'loads json with objects');
+  assert.equal(data.contributors.length, 4, 'loads json with arrays');
+};
+
 exports['test setting metadata for newly created sandboxes'] = function(assert) {
   let addonID = 'random-addon-id';
   let uri = root + '/fixtures/loader/cycles/';
@@ -331,7 +345,7 @@ exports['test console global by default'] = function (assert) {
   let uri = root + '/fixtures/loader/globals/';
   let loader = Loader({ paths: { '': uri }});
   let program = main(loader, 'main');
- 
+
   assert.ok(typeof program.console === 'object', 'global `console` exists');
   assert.ok(typeof program.console.log === 'function', 'global `console.log` exists');
 
